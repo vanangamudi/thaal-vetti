@@ -311,27 +311,36 @@ class Vetti:
 def process(args):
 
     image = cv2.imread('0000.png', -1)
+
     imshow('temp 1', image)
     cv2.waitKey(0)
     vetti = Vetti(args, os.path.basename(args.filepath), image)
     line = vetti.event_loop()
 
-    mask  = np.ones(image.shape, dtype=np.uint8)
-    imshow('temp 2', mask)
-    cv2.waitKey(0)
-    roi_corners = np.array(
-        [[ (10, 10), (300, 300), (10, 300), (240, 300)]],
-        dtype=np.int32)
-
-    n_channels = image.shape[2]
-    ignore_mask_color = (255, ) * n_channels
+    print(image.shape)
     
-    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-    masked_image = cv2.bitwise_and(image, mask)
+    h, w, n_channels = image.shape
+    x1, y1, x2, y2   = extend_line_to_boundary(image, line)
 
-    imshow('temp 3', masked_image)
-    cv2.waitKey(0)
+    print([x1, y1], [x2, y2])
     
+    left_roi  = [[(0, 0), (h, 0), (x2, y2), (x1, y1)]]
+    right_roi = [[(h, w), (0, w), (x1, y1), (x2, y2)]]
+
+    def mask(roi):
+        mask  = np.ones(image.shape, dtype=np.uint8)
+        roi_corners = np.array(roi, dtype=np.int32)
+        ignore_mask_color = (255, ) * n_channels
+        
+        cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+        masked_image = cv2.bitwise_and(image, mask)
+
+        return masked_image
+    
+    imshow('temp 3', mask(left_roi))
+    imshow('temp 4', mask(right_roi))
+    cv2.waitKey(0)
+        
     right_mask = np.ones(image.shape, dtype=np.uint8)
            
 import argparse
