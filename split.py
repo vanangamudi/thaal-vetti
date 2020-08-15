@@ -26,8 +26,8 @@ def imshow(name, img, resize_factor = 0.4):
                                  fy=resize_factor))
 
 def slope(x1, y1,  x2, y2):
-    if x2!=x1:
-        return((y2-y1)/(x2-x1))
+    if x2 != x1:
+        return( (y2 - y1) / (x2 - x1) )
     else:
         return 'NA'
 
@@ -120,8 +120,11 @@ class Vetti:
 
     def draw_line(self, img, line, color=(255,0,0), thickness=4):
         h, w = img.shape[:2]
-        m, b = line
-        """
+        print(line)
+        (x1, y1), (x2, y2) = line
+        m = slope(x1, y1, x2, y2)
+        log.debug('slope: {}'.format(m))
+
         if m != 'NA':
             px, py = 0, -(x1-0) * m + y1
             qx, qy = w, -(x2-w) * m + y2
@@ -130,13 +133,19 @@ class Vetti:
             qx , qy = x1, h
 
         px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
-        """
-        (px, py), (qx, qy) = self.line
+        log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
+
+   
         cv2.line(img,
                  (px, py), (qx, qy),
                  color,
                  thickness)
-
+        """
+        cv2.line(img,
+                 (x1, y1), (x2, y2),
+                 (0, 255, 0),
+                 thickness)
+        """        
     def draw(self):
         del self.img
         self.img = self.source.copy()
@@ -144,22 +153,30 @@ class Vetti:
 
     def callback(self, event, x, y, flags, param):
         temp = [self.scale_factor * x, self.scale_factor * y]
-
+        
         if event == cv2.EVENT_LBUTTONDOWN:
             log.info('1 temp: {}'.format(pformat(temp)))
             self.first_point = temp
+            log.info('1 line: {}'.format(pformat(self.line)))
+            self.line[0] = temp
             self.first_point_set = True
+            self.draw()
             
         if event == cv2.EVENT_MOUSEMOVE:
-            log.info('2 temp: {}'.format(pformat(temp)))
-            self.line[1] = temp 
+            if self.first_point_set:
+                log.info('2 temp: {}'.format(pformat(temp)))
+                self.line[1] = temp
+                log.info('2 line: {}'.format(pformat(self.line)))
+                self.draw()
         
         if event == cv2.EVENT_LBUTTONUP:
             log.info('3 temp: {}'.format(pformat(temp)))
             if self.first_point_set:
                 self.line[1] = temp
-            
-            
+                self.first_point_set = False
+                log.info('3 line: {}'.format(pformat(self.line)))
+                self.draw()
+        
     def event_loop(self):
         print('image state == {} and args.force == {}'.format(self.finished, self.args.force))
         if self.finished == False or self.args.force:
@@ -169,9 +186,22 @@ class Vetti:
             self.source = rotate(self.source_backup, self.rotation)
             
             while True:
-                self.imshow(self.name, self.img)
+                """
+                self.img = self.source.copy()
+                x1 = random.randint(0, self.img.shape[1])
+                y1 = random.randint(0, self.img.shape[0])
+                x2 = random.randint(0, self.img.shape[1])
+                y2 = random.randint(0, self.img.shape[0])
+                cv2.line(self. img,
+                         (x1, y1), (x2, y2),
+                         (0, 255, 0),
+                         5)
+                """
+                
                 cv2.setMouseCallback(self.name, self.callback)
-                k = cv2.waitKey(0) & 0xFF
+                self.imshow(self.name, self.img)
+
+                k = cv2.waitKey(100) & 0xFF
                 if k == 27:
                     log.debug('setting state to grab')
                     if self.line_backup != None:
@@ -227,8 +257,6 @@ class Vetti:
 def process(args):
 
     image = cv2.imread('0000.png', -1)
-    imshow('image', image)
-    cv2.waitKey(0)
 
     vetti = Vetti(args, os.path.basename(args.filepath), image)
     line = vetti.event_loop()
