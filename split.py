@@ -29,7 +29,7 @@ LINE_THICKNESS = 3
 def imshow(name, img, resize_factor = 0.4):
     return cv2.imshow(name,
                       cv2.resize(img,
-                                 (0,0),
+                                 (0, 0),
                                  fx=resize_factor,
                                  fy=resize_factor))
 
@@ -38,7 +38,26 @@ def slope(x1, y1,  x2, y2):
         return( (y2 - y1) / (x2 - x1) )
     else:
         return 'NA'
+    
+def extend_line_to_boundary(img, line):
+    (x1, y1), (x2, y2) = line
 
+    m = slope(x1, y1, x2, y2)
+    log.debug('slope: {}'.format(m))
+
+    h, w = img.shape[:2]
+    if m != 'NA':
+        px, py = 0, -(x1-0) * m + y1
+        qx, qy = w, -(x2-w) * m + y2
+    else:
+        px , py = x1, 0
+        qx , qy = x1, h
+
+    px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
+    log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
+
+    return px, py, qx, qy
+            
 def mkdir_if_exist_not(name):
     if not os.path.isdir(name):
         return os.makedirs(name)
@@ -124,29 +143,15 @@ class Vetti:
             log.exception('====')
             
     def imshow(self, name, img):
-        imshow(name, img, 1.0/self.scale_factor)
+        imshow(name, img, 1/self.scale_factor)
 
     def is_finished(self):
         return self.finished
 
     def draw_line(self, img, line, color=(255,0,0), thickness=4):
-        h, w = img.shape[:2]
-        print(line)
-        (x1, y1), (x2, y2) = line
-        m = slope(x1, y1, x2, y2)
-        log.debug('slope: {}'.format(m))
-
-        if m != 'NA':
-            px, py = 0, -(x1-0) * m + y1
-            qx, qy = w, -(x2-w) * m + y2
-        else:
-            px , py = x1, 0
-            qx , qy = x1, h
-
-        px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
-        log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
-
-   
+        (x1, y1), (x2, y2) = line            
+        px, py, qx, qy = extend_line_to_boundary(img, line)
+        
         cv2.line(img,
                  (px, py), (qx, qy),
                  COLOR_LINE,
@@ -261,22 +266,40 @@ class Vetti:
                     self.finished = True
                     self.save_state()
 
-                elif k == ord('\n'):
+                elif k == 13:
                     self.save_state()
                     break
 
             self.save_state()
 
-        cv2.destroyAllWindows()
+        cv2.destroyWindow(self.name)
         return self.line
 
 def process(args):
 
     image = cv2.imread('0000.png', -1)
-
+    imshow('temp 1', image)
+    cv2.waitKey(0)
     vetti = Vetti(args, os.path.basename(args.filepath), image)
     line = vetti.event_loop()
 
+    mask  = np.ones(image.shape, dtype=np.uint8)
+    imshow('temp 2', mask)
+    cv2.waitKey(0)
+    roi_corners = np.array(
+        [[ (10, 10), (300, 300), (10, 300), (240, 300)]],
+        dtype=np.int32)
+
+    n_channels = image.shape[2]
+    ignore_mask_color = (255, ) * n_channels
+    
+    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+    masked_image = cv2.bitwise_and(image, mask)
+
+    imshow('temp 3', masked_image)
+    cv2.waitKey(0)
+    
+    right_mask = np.ones(image.shape, dtype=np.uint8)
            
 import argparse
 if __name__ == '__main__':
