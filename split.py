@@ -9,6 +9,8 @@ import sys
 import json
 import math
 import copy
+
+import pdb
     
 import logging
 FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
@@ -33,6 +35,16 @@ def imshow(name, img, resize_factor = 0.4):
                                  fx=resize_factor,
                                  fy=resize_factor))
 
+def put_text(img, text, position):
+    cv2.putText(img,
+                text,
+                position,
+                cv2.FONT_HERSHEY_SIMPLEX,  
+                1,
+                COLOR_LINE,
+                2,
+                cv2.LINE_AA)
+        
 def slope(x1, y1,  x2, y2):
     if x2 != x1:
         return( (y2 - y1) / (x2 - x1) )
@@ -42,13 +54,18 @@ def slope(x1, y1,  x2, y2):
 def extend_line_to_boundary(img, line):
     (x1, y1), (x2, y2) = line
 
+    log.debug(
+        '(x1, y1), (x2, y2): ({}, {}), ({}, {})'.format(
+            x1, y1, x2, y2))
+    
     m = slope(x1, y1, x2, y2)
     log.debug('slope: {}'.format(m))
 
     h, w = img.shape[:2]
+    log.debug('h, w: {}, {}'.format(h, w))
     if m != 'NA':
-        px, py = 0, -(x1-0) * m + y1
-        qx, qy = w, -(x2-w) * m + y2
+        px, py = 0, -(x1 - 0) * m + y1
+        qx, qy = w, -(x2 - w) * m + y2
     else:
         px , py = x1, 0
         qx , qy = x1, h
@@ -169,10 +186,16 @@ class Vetti:
                  COLOR_LINE_SEGMENT,
                  LINE_SEGMENT_THICKNESS)
 
+        put_text(self.img,
+                 '({})'.format(slope(x1, y1, x2, y2)),
+                 (100, 100))        
+        
     def draw(self):
         del self.img
         self.img = self.source.copy()
         self.draw_line(self.img, self.line)
+
+        
 
     def callback(self, event, x, y, flags, param):
         temp = [self.scale_factor * x, self.scale_factor * y]
@@ -186,11 +209,17 @@ class Vetti:
             self.draw()
             
         if event == cv2.EVENT_MOUSEMOVE:
+      
             if self.first_point_set:
                 log.info('2 temp: {}'.format(pformat(temp)))
                 self.line[1] = temp
                 log.info('2 line: {}'.format(pformat(self.line)))
-                self.draw()
+                
+            self.draw()
+            put_text(self.img,
+                     '({}, {}) - ({}, {})'.format(*self.line[0],
+                                                  *temp),
+                     (100, 150))
         
         if event == cv2.EVENT_LBUTTONUP:
             log.info('3 temp: {}'.format(pformat(temp)))
