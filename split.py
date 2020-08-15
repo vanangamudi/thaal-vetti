@@ -18,6 +18,14 @@ log.setLevel(logging.DEBUG)
 
 from pprint import pprint, pformat
 
+COLOR_LINE         = (212, 188,   0)
+COLOR_LINE_SEGMENT = (000,  44, 221)
+COLOR_CIRCLE       = (34,   87, 255)
+
+CIRCLE_RADIUS = 24
+LINE_SEGMENT_THICKNESS = 12
+LINE_THICKNESS = 3
+
 def imshow(name, img, resize_factor = 0.4):
     return cv2.imshow(name,
                       cv2.resize(img,
@@ -58,6 +66,7 @@ class Vetti:
     STATE_LINE_DRAWING = -1
     
     def __init__(self, args, name, img,
+                 scale_factor = 0.5,
                  unit_rotation = 0.1):
 
         self.args = args
@@ -71,7 +80,7 @@ class Vetti:
         #should saved to file
         self.finished = False
         self.unit_rotation = unit_rotation
-        self.scale_factor = int(1/0.3)
+        self.scale_factor = int(1/scale_factor)
 
         self.rotation = 0
 
@@ -79,6 +88,8 @@ class Vetti:
 
         self.first_point = None
         self.first_point_set = False
+
+        self.load_state()
 
     def save_state(self):
         mkdir_if_exist_not('{}'.format(self.args.output_dir))
@@ -138,14 +149,17 @@ class Vetti:
    
         cv2.line(img,
                  (px, py), (qx, qy),
-                 color,
-                 thickness)
-        """
+                 COLOR_LINE,
+                 LINE_THICKNESS)
+        
+        cv2.circle(img, tuple(line[0]), CIRCLE_RADIUS, COLOR_CIRCLE, -1)
+        cv2.circle(img, tuple(line[1]), CIRCLE_RADIUS, COLOR_CIRCLE, -1)
+
         cv2.line(img,
                  (x1, y1), (x2, y2),
-                 (0, 255, 0),
-                 thickness)
-        """        
+                 COLOR_LINE_SEGMENT,
+                 LINE_SEGMENT_THICKNESS)
+
     def draw(self):
         del self.img
         self.img = self.source.copy()
@@ -179,6 +193,10 @@ class Vetti:
         
     def event_loop(self):
         print('image state == {} and args.force == {}'.format(self.finished, self.args.force))
+
+        if self.finished:
+            print('already tagged image!!!')
+        
         if self.finished == False or self.args.force:
             self.finished = False
             self.draw()
@@ -251,8 +269,6 @@ class Vetti:
 
         cv2.destroyAllWindows()
         return self.line
-
-  
 
 def process(args):
 
