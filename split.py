@@ -99,7 +99,11 @@ class Vetti:
         #should saved to file
         self.finished = False
         self.unit_rotation = unit_rotation
-        self.scale_factor = int(1/scale_factor)
+        
+        # this is very important otherwise callback point
+        # and drawn points will not match,
+        # I dare you change this I double dare you!!
+        self.scale_factor = int(1/scale_factor) 
 
         self.rotation = 0
 
