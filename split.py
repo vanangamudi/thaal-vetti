@@ -28,7 +28,10 @@ CIRCLE_RADIUS = 24
 LINE_SEGMENT_THICKNESS = 12
 LINE_THICKNESS = 3
 
-EPSILON = 1e-5
+
+def mkdir_if_exist_not(name):
+    if not os.path.isdir(name):
+        return os.makedirs(name)
 
 def imshow(name, img, resize_factor = 0.4):
     return cv2.imshow(name,
@@ -53,12 +56,6 @@ def slope(x1, y1,  x2, y2):
     else:
         return 'NA'
 
-def intercept(x1, y1, x2, y2):
-    m = slope(x1, y1, x2, y2)
-    #y = mx + b
-    assert (y1 - m * x1) == (y2 - m * x2), 'are you sure, this equation is correct?'
-    return (y1 - m * x1)
-    
 def extend_line_to_boundary(img, line):
     (x1, y1), (x2, y2) = line
 
@@ -85,128 +82,6 @@ def extend_line_to_boundary(img, line):
 
     return px, py, qx, qy
 
-
-def line_segment_intersection(line1, line2):
-    """
-    https://answers.opencv.org/question/205766/how-to-find-intersection-point-and-the-distance-for-ray-line-segment-intersection-in-opencv/?answer=205771#post-id-205771
-    """
-    def almost_equal(a, b):
-        return abs(a - b) <= (EPSILON * max(1.0, abs(a), abs(b)))
-
-    a1, b1 = line2
-    a2, b2 = line2
-     
-    A1 = b1[1] - a1[1];
-    B1 = a1[0] - b1[0];
-    C1 = (a1[0] * A1) + (a1[1] * B1);
-
-    A2 = b2[1] - a2[1];
-    B2 = a2[0] - b2[0];
-    C2 = (a2[0] * A2) + (a2[1] * B2);
-
-    det = (A1 * B2) - (A2 * B1);
-
-    if not almost_equal(det, 0) :
-        ix = ((C1 * B2) - (C2 * B1)) / (det)
-        iy = ((C2 * A1) - (C1 * A2)) / (det)
-
-        return True, (ix, iy);
-
-    return False, (EPSILON, EPSILON);
-
-def extend_line_to_boundary2(img, line):
-    h, w, _ = img.shape
-    _, (px, py) = line_segment_intersection(line, ((0, 0), (0, w)) )
-    _, (qx, qy) = line_segment_intersection(line, ((h, 0), (h, w)) )
-    
-    px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
-    log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
-
-    return px, py, qx, qy
-
-def extend_line_to_boundary3(img, line):
-    """
-    find slope and intercept and then use that to find the intersection
-    """
-    h, w, _ = img.shape
-
-    log.debug('h, w: {}, {}'.format(h , w))
-    
-
-    (x1, y1), (x2, y2) = line
-    
-    log.debug(
-        '(x1, y1), (x2, y2): ({}, {}), ({}, {})'.format(
-            x1, y1, x2, y2))
-    
-        
-    m, b = slope(x1, y1, x2, y2), intercept(x1, y1, x2, y2)
-
-    log.debug('m, b: {}, {}'.format(m, b))
-    
-    py, qy = 0, h
-    
-    px = (0 - b) / m
-    qx = (h - b) / m
-
-    px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
-    log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
-
-    
-    return px, py, qx, py
-
-
-def intersection2(line1, line2):
-    """
-    find intersection between a line and line support created by extend_line_to_boundary()
-    https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-    """
-    (x1, y1), (x2, y2) = line1
-    (x3, y3), (x4, y4) = line2
-
-    px  = (
-        ( (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4) )
-        /
-        ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
-    )
-
-    py = (
-        ( (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4) )
-        /
-        ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
-    )
-
-    return px, py
-    
-    
-def extend_line_to_boundary4(img, line):
-    h, w, _ = img.shape
-
-    log.debug('h, w: {}, {}'.format(h , w))
-    (x1, y1), (x2, y2) = line
-    
-    log.debug(
-        '(x1, y1), (x2, y2): ({}, {}), ({}, {})'.format(
-            x1, y1, x2, y2))
-    
-    x3, y3, x4, y4 = extend_line_to_boundary(img, line)
-    
-    line_support = ((x3, y3), (x4, y4))
-
-    px, py = intersection2( ((0, 0), (w, 0)), line_support )
-    qx, qy = intersection2( ((h, 0), (w, h)), line_support )
-
-    px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
-    log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
-
-    
-    return px, py, qx, py
-
-
-def mkdir_if_exist_not(name):
-    if not os.path.isdir(name):
-        return os.makedirs(name)
-    
 def rotate(image, angleInDegrees):
     h, w = image.shape[:2]
     img_c = (w / 2, h / 2)
@@ -300,10 +175,8 @@ class Vetti:
     def draw_line(self, img, line, color=(255,0,0), thickness=4):
         (x1, y1), (x2, y2) = line
         h, w, c = img.shape
-        #px, py, qx, qy = extend_line_to_boundary(img, line)
-        #px, py, qx, qy = extend_line_to_boundary2(img, line)
-        #px, py, qx, qy = extend_line_to_boundary3(img, line)
-        px, py, qx, qy = extend_line_to_boundary4(img, line)
+
+        px, py, qx, qy = extend_line_to_boundary(img, line)
         
         cv2.line(img,
                  (px, py), (qx, qy),
@@ -441,10 +314,11 @@ class Vetti:
         return self.line
 
 def callback_show_point_func(img):
-    def callback(self, event, x, y, flags, param):
+    def callback(event, x, y, flags, param):
         if event == cv2.EVENT_MOUSEMOVE:
+            log.debug('({}, {})'.format(x, y))
             put_text(img,
-                     '({}, {})'.format(x, y)
+                     '({}, {})'.format(x, y),
                      (100, 150))
 
     return callback
@@ -519,12 +393,10 @@ def process(args):
     left  = mask(left_roi)
     right = mask(right_roi)
 
-    
-
     if args.very_verbose:
-        imshow('temp 3', left)
-        imshow('temp 4', right)
-        
+            imshow('temp 3', lcopy)
+            imshow('temp 4', rcopy)
+                            
     cv2.waitKey(0)
            
 import argparse
