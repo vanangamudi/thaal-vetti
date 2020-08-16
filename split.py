@@ -28,6 +28,8 @@ CIRCLE_RADIUS = 24
 LINE_SEGMENT_THICKNESS = 12
 LINE_THICKNESS = 3
 
+EPSILON = 1e-5
+
 def imshow(name, img, resize_factor = 0.4):
     return cv2.imshow(name,
                       cv2.resize(img,
@@ -308,6 +310,15 @@ class Vetti:
         cv2.destroyWindow(self.name)
         return self.line
 
+def callback_show_point_func(img):
+    def callback(self, event, x, y, flags, param):
+        if event == cv2.EVENT_MOUSEMOVE:
+            put_text(img,
+                     '({}, {})'.format(x, y)
+                     (100, 150))
+
+    return callback
+    
 def process(args):
 
     image = cv2.imread('0000.png', -1)
@@ -321,27 +332,70 @@ def process(args):
     
     h, w, n_channels = image.shape
     x1, y1, x2, y2   = extend_line_to_boundary(image, line)
+    #(x1, y1), (x2, y2)= line
 
-    print([x1, y1], [x2, y2])
+    print([x1, y1], [x2, y2], h, w)
     
-    left_roi  = [[(0, 0), (h, 0), (x2, y2), (x1, y1)]]
-    right_roi = [[(h, w), (0, w), (x1, y1), (x2, y2)]]
+    left_roi  = [[(0, 0), (0, h), (x1, y1), (x2, y2),]]
+    right_roi = [[(w, 0), (w, h), (x1, y1), (x2, y2),]]
+
+    print(left_roi)
+    print(right_roi)
 
     def mask(roi):
-        mask  = np.ones(image.shape, dtype=np.uint8)
+        mask  = np.zeros(image.shape, dtype=np.uint8)
         roi_corners = np.array(roi, dtype=np.int32)
         ignore_mask_color = (255, ) * n_channels
         
         cv2.fillPoly(mask, roi_corners, ignore_mask_color)
         masked_image = cv2.bitwise_and(image, mask)
 
-        return masked_image
-    
-    imshow('temp 3', mask(left_roi))
-    imshow('temp 4', mask(right_roi))
-    cv2.waitKey(0)
+        if args.very_verbose:
+            cv2.polylines(masked_image, roi_corners, False, COLOR_LINE_SEGMENT, 5)
+            
+            #--- padding
+            ht, wd, cc = masked_image.shape
+            hh, ww, = h + 200, w + 200
+            
+            xx = (ww - wd) // 2
+            yy = (hh - ht) // 2
+            
+            temp = masked_image
+            masked_image = np.full( (hh,ww,cc),
+                                    (255, 255, 255, 255),
+                                    dtype=np.uint8)
+            
+            masked_image[yy:yy+ht, xx:xx+wd] = temp
+            #---
         
-    right_mask = np.ones(image.shape, dtype=np.uint8)
+            put_text(masked_image,
+                     '1 ({}, {})'.format(*roi[0][0]),
+                     tuple(i + 100 for i in roi[0][0]))
+            
+            put_text(masked_image,
+                     '2 ({}, {})'.format(*roi[0][1]),
+                     tuple(i + 100 for i in roi[0][1]))
+            
+            put_text(masked_image,
+                     '3 ({}, {})'.format(*roi[0][2]),
+                     (w//2, 100))
+            
+            put_text(masked_image,
+                     '4 ({}, {})'.format(*roi[0][3]),
+                     (w//2, h - 100 ))
+        
+        return masked_image
+
+    left  = mask(left_roi)
+    right = mask(right_roi)
+
+    
+
+    if args.very_verbose:
+        imshow('temp 3', left)
+        imshow('temp 4', right)
+        
+    cv2.waitKey(0)
            
 import argparse
 if __name__ == '__main__':
