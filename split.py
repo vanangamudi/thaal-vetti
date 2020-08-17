@@ -56,6 +56,13 @@ def slope(x1, y1,  x2, y2):
     else:
         return 'NA'
 
+
+def intercept(x1, y1, x2, y2):
+    m = slope(x1, y1, x2, y2)
+    #y = mx + b
+    assert (y1 - m * x1) == (y2 - m * x2), 'are you sure, this equation is correct?'
+    return (y1 - m * x1)
+
 def extend_line_to_boundary(img, line):
     (x1, y1), (x2, y2) = line
 
@@ -76,6 +83,35 @@ def extend_line_to_boundary(img, line):
     else:
         px , py = x1, 0
         qx , qy = x1, h
+
+    px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
+    log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
+
+    return px, py, qx, qy
+
+def extend_line_to_boundary3(img, line):
+    """
+    find slope and intercept and then use that to find the intersection
+    """
+    h, w, _ = img.shape
+
+    log.debug('h, w: {}, {}'.format(h , w))
+
+    (x1, y1), (x2, y2) = line
+
+    log.debug(
+        '(x1, y1), (x2, y2): ({}, {}), ({}, {})'.format(
+            x1, y1, x2, y2))
+
+
+    m, b = slope(x1, y1, x2, y2), intercept(x1, y1, x2, y2)
+
+    log.debug('m, b: {}, {}'.format(m, b))
+
+    py, qy = 0, h
+
+    px = (0 - b) / m
+    qx = (h - b) / m
 
     px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
     log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
@@ -176,15 +212,24 @@ class Vetti:
         (x1, y1), (x2, y2) = line
         h, w, c = img.shape
 
-        px, py, qx, qy = extend_line_to_boundary(img, line)
-        
+        px, py, qx, qy = extend_line_to_boundary3(img, line)
+
         cv2.line(img,
                  (px, py), (qx, qy),
                  COLOR_LINE,
                  LINE_THICKNESS)
         
-        cv2.circle(img, tuple(line[0]), CIRCLE_RADIUS, COLOR_CIRCLE, -1)
-        cv2.circle(img, tuple(line[1]), CIRCLE_RADIUS, COLOR_CIRCLE, -1)
+        cv2.circle(img,
+                   tuple(line[0]),
+                   CIRCLE_RADIUS,
+                   COLOR_CIRCLE,
+                   -1)
+        
+        cv2.circle(img,
+                   tuple(line[1]),
+                   CIRCLE_RADIUS,
+                   COLOR_CIRCLE,
+                   -1)
 
         cv2.line(img,
                  (x1, y1), (x2, y2),
@@ -394,8 +439,8 @@ def process(args):
     right = mask(right_roi)
 
     if args.very_verbose:
-            imshow('temp 3', lcopy)
-            imshow('temp 4', rcopy)
+            imshow('temp 3', left)
+            imshow('temp 4', right)
                             
     cv2.waitKey(0)
            
