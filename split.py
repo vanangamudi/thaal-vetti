@@ -472,14 +472,26 @@ def process(args):
     if args.debug:
             imshow('left', left)
             imshow('right', right)
+            cv2.waitKey(0)
+            
 
-    cv2.imwrite('{}_0.jpg'.format(os.path.splitext(args.filepath)[0]),
-                left)
+    cv2.imwrite(
+        '{}{}{}_0.png'.format(
+            args.output_dir,
+            os.path.sep,
+            os.path.splitext(args.filepath)[0],
+        ),
+        left)
     
-    cv2.imwrite('{}_1.jpg'.format(os.path.splitext(args.filepath)[0]),
-                right)
-                            
-    cv2.waitKey(0)
+    cv2.imwrite(
+        '{}{}{}_1.png'.format(
+            args.output_dir,
+            os.path.sep,
+            os.path.splitext(args.filepath)[0]
+        ),
+        right)
+    
+
            
 import argparse
 if __name__ == '__main__':
