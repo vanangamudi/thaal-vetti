@@ -403,9 +403,19 @@ def process(args):
         
         cv2.fillPoly(mask, roi_corners, ignore_mask_color)
         masked_image = cv2.bitwise_and(image, mask)
-
+        #np.copyto(masked_image, image, mask)
+        #masked_image += image * (mask > 0)
+        
+        masked_image += 255 * np.ones(image.shape, dtype=np.uint8) * (mask == 0)
+        
+        log.debug('mask shape: {}'.format(pformat(mask.shape)))
+        
         if args.very_verbose:
-            cv2.polylines(masked_image, roi_corners, False, COLOR_LINE_SEGMENT, 5)
+            cv2.polylines(masked_image,
+                          roi_corners,
+                          False,
+                          COLOR_LINE_SEGMENT,
+                          5)
             
             #--- padding
             # ht, wd, cc = masked_image.shape
@@ -442,10 +452,10 @@ def process(args):
 
     left  = mask(left_roi)
     right = mask(right_roi)
-
+    
     xlim = max(x1, x2)
     left = left[:, :xlim]
-
+    
     xlim = min(x1, x2)
     right = right[:, xlim:]
     
@@ -453,8 +463,11 @@ def process(args):
             imshow('left', left)
             imshow('right', right)
 
-    cv2.imwrite('{}_0.jpg'.format(os.path.splitext(args.filepath)[0]), left)
-    cv2.imwrite('{}_1.jpg'.format(os.path.splitext(args.filepath)[0]), right)
+    cv2.imwrite('{}_0.jpg'.format(os.path.splitext(args.filepath)[0]),
+                left)
+    
+    cv2.imwrite('{}_1.jpg'.format(os.path.splitext(args.filepath)[0]),
+                right)
                             
     cv2.waitKey(0)
            
@@ -492,7 +505,7 @@ if __name__ == '__main__':
 
     pprint(args)
     
-    args.filepath = '0000.png'
+    args.filepath = 'data/0000.png'
     process(args)
     
     """
