@@ -370,7 +370,7 @@ def callback_show_point_func(img):
     
 def process(args):
 
-    image = cv2.imread('0000.png', -1)
+    image = cv2.imread(args.filepath, -1)
 
     imshow('temp 1', image)
     cv2.waitKey(0)
@@ -447,6 +447,9 @@ def process(args):
     if args.very_verbose:
             imshow('left', left)
             imshow('right', right)
+
+    cv2.imwrite('{}_0.jpg'.format(os.path.splitext(args.filepath)[0]), left)
+    cv2.imwrite('{}_1.jpg'.format(os.path.splitext(args.filepath)[0]), right)
                             
     cv2.waitKey(0)
            
