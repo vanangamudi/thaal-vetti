@@ -381,9 +381,15 @@ def process(args):
 
     image = cv2.imread(args.filepath, -1)
 
-    imshow('temp 1', image)
-    cv2.waitKey(0)
-    vetti = Vetti(args, os.path.basename(args.filepath), image)
+    if args.verbose:
+        imshow('temp 1', image)
+        cv2.waitKey(0)
+        
+    vetti = Vetti(args,
+                  os.path.basename(args.filepath),
+                  image,
+                  scale_factor=args.scale_factor)
+    
     line = vetti.event_loop()
 
     print(image.shape)
@@ -489,6 +495,11 @@ if __name__ == '__main__':
                         help='shows all the grid overlayed in input image',
                         action='store_true', default=False, dest='verbose')
 
+    parser.add_argument('--display-resolution',
+                        help='display resolution of input image',
+                        action='store', default=0.3, dest='scale_factor')
+
+    
     parser.add_argument('-D', '--debug',
                         help='shows all the pieces of the characters',
                         action='store_true', default=False, dest='debug')
