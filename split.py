@@ -410,7 +410,7 @@ def process(args):
         
         log.debug('mask shape: {}'.format(pformat(mask.shape)))
         
-        if args.very_verbose:
+        if args.debug:
             cv2.polylines(masked_image,
                           roi_corners,
                           False,
@@ -459,7 +459,7 @@ def process(args):
     xlim = min(x1, x2)
     right = right[:, xlim:]
     
-    if args.very_verbose:
+    if args.debug:
             imshow('left', left)
             imshow('right', right)
 
@@ -485,9 +485,9 @@ if __name__ == '__main__':
                         help='shows all the grid overlayed in input image',
                         action='store_true', default=False, dest='verbose')
 
-    parser.add_argument('-V', '--very-verbose',
+    parser.add_argument('-D', '--debug',
                         help='shows all the pieces of the characters',
-                        action='store_true', default=False, dest='very_verbose')
+                        action='store_true', default=False, dest='debug')
         
     parser.add_argument('-F','--force',
                         help='start tagging even if finished set to true',
