@@ -34,12 +34,16 @@ def mkdir_if_exist_not(name):
         return os.makedirs(name)
 
 def imshow(name, img, resize_factor = 0.4):
-    return cv2.imshow(name,
-                      cv2.resize(img,
-                                 (0, 0),
-                                 fx=resize_factor,
-                                 fy=resize_factor))
+    ret = cv2.imshow(name,
+                     cv2.resize(img,
+                                (0, 0),
+                                fx=resize_factor,
+                                fy=resize_factor))
+    
+    cv2.moveWindow(name, 100, 100)
 
+    return ret
+    
 def put_text(img, text, position):
     cv2.putText(img,
                 text,
