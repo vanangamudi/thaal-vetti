@@ -1,0 +1,83 @@
+* Color space and PNG 
+
+#+BEGIN_SRC bash
+$ convert -set colorspace RGB -density 300 $INPUT $INPUT_PAGES_DIR/%04d.png
+convert-im6.q16: profile 'icc': 'RGB ': RGB color space not permitted on grayscale PNG `data/test.pdf_pages/%04d.png' @ warning/png.c/MagickPNGWarningHandler/1667.
+#+END_SRC
+
+** Solution
+#+BEGIN_SRC bash
+$ convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.png
+#+END_SRC
+
+
+* Attempt to perform ops unallowed by secutiry
+If you get the following error
+
+#+BEGIN_SRC 
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `PDF' @ error/constitute.c/IsCoderAuthorized/408.
+#+END_SRC
+
+** Solution:
+- paste this in imagemagick config
+
+#+BEGIN_SRC 
+    <policy domain="coder" rights="read | write" pattern="PDF" />
+ in policymap section, i.e just before </policymap> in '/etc/ImageMagick-7/policy.xml'
+#+END_SRC
+
+** references
+1. https://stackoverflow.com/questions/52998331/imagemagick-security-policy-pdf-blocking-conversion
+
+
+* Cache exhaustion by convert tool
+
+For the following error
+#+BEGIN_SRC
+
+$ time ./split.sh data/ancient-tamil.pdf 
+chunking pdf file into pages
+convert-im6.q16: cache resources exhausted `data/ancient-tamil.pdf' @ error/cache.c/OpenPixelCache/4083.
+convert-im6.q16: cache resources exhausted `data/ancient-tamil.pdf_pages/%04d.jpg' @ error/cache.c/OpenPixelCache/4083.
+convert-im6.q16: No IDATs written into file `data/ancient-tamil.pdf_pages/0000.jpg' @ error/png.c/MagickPNGErrorHandler/1641.
+1 chunking failed!!!
+
+#+END_SRC
+
+** Solution:
+- Change the lines as follows. 
+- The numbers should depend upon your image size. 
+- You might even want to alter width and height params 
+
+#+BEGIN_SRC diff 
+diff -u --label /sudo\:root\@karunthulai\:/etc/ImageMagick-6/policy.xml.bk --label /sudo\:root\@karunthulai\:/etc/ImageMagick-6/policy.xml /tmp/tramp.bAqyMj.bk /tmp/tramp.yLi6US.xml
+--- /sudo:root@karunthulai:/etc/ImageMagick-6/policy.xml.bk
++++ /sudo:root@karunthulai:/etc/ImageMagick-6/policy.xml
+@@ -57,13 +57,13 @@
+   <!-- <policy domain="system" name="memory-map" value="anonymous"/> -->
+   <!-- <policy domain="system" name="max-memory-request" value="256MiB"/> -->
+   <!-- <policy domain="resource" name="temporary-path" value="/tmp"/> -->
+-  <policy domain="resource" name="memory" value="256MiB"/>
+-  <policy domain="resource" name="map" value="512MiB"/>
++  <policy domain="resource" name="memory" value="2GiB"/>
++  <policy domain="resource" name="map" value="4GiB"/>
+   <policy domain="resource" name="width" value="16KP"/>
+   <policy domain="resource" name="height" value="16KP"/>
+   <!-- <policy domain="resource" name="list-length" value="128"/> -->
+-  <policy domain="resource" name="area" value="128MB"/>
+-  <policy domain="resource" name="disk" value="1GiB"/>
++  <policy domain="resource" name="area" value="1280MB"/>
++  <policy domain="resource" name="disk" value="10GiB"/>
+   <!-- <policy domain="resource" name="file" value="768"/> -->
+   <!-- <policy domain="resource" name="thread" value="4"/> -->
+   <!-- <policy domain="resource" name="throttle" value="0"/> -->
+
+Diff finished.  Mon Aug 17 22:28:06 2020
+
+#+END_SRC
+
+- temporary path should be on a disk with good amount of free space
+
+** refernces: 
+1. https://github.com/ImageMagick/ImageMagick/issues/396
+2. https://www.imagemagick.org/script/architecture.php#cache
