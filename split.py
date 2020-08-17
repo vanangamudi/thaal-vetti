@@ -16,7 +16,7 @@ import logging
 FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
 logging.basicConfig(format=FORMAT_STRING)
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 from pprint import pprint, pformat
 
@@ -491,7 +491,6 @@ def process(args):
         ),
         right)
     
-
            
 import argparse
 if __name__ == '__main__':
@@ -528,21 +527,25 @@ if __name__ == '__main__':
                         help='path to the image file',
                         default='split_pages', dest='output_dir')
     
+    
     args = parser.parse_args()
 
     pprint(args)
     
-    args.filepath = 'data/0000.png'
-    process(args)
+    #args.filepath = 'data/0000.png'
+    #process(args)
     
-    """
-    for filepath in glob('{}/*.jpg'.format(args.input_dir)):
+
+    errored_pages = []
+    for filepath in sorted(glob('{}/*.png'.format(args.input_dir))):
         log.info('processing {}'.format(filepath))
-        args.filepath = filepath
-        total_count, shapes = process(args)
-        print('total count: {}'.format(total_count))
-        
-        write_shapes(args, shapes)
+        try:
+            args.filepath = filepath
+            process(args)
+        except:
+            log.exception(args.filepath)
+            errored_pages.append(args.filepath)
+            
         cv2.destroyAllWindows()
         
-    """
+
