@@ -60,7 +60,11 @@ def slope(x1, y1,  x2, y2):
 def intercept(x1, y1, x2, y2):
     m = slope(x1, y1, x2, y2)
     #y = mx + b
-    assert (y1 - m * x1) == (y2 - m * x2), 'are you sure, this equation is correct?'
+    assert int(y1 - m * x1) == int(y2 - m * x2), \
+        '{} =/= {} are you sure, this equation is correct?'.format(
+            int(y1 - m * x1),
+            int(y2 - m * x2))
+    
     return (y1 - m * x1)
 
 def extend_line_to_boundary(img, line):
@@ -198,6 +202,7 @@ class Vetti:
                 
         except IOError:
             log.exception('====')
+            log.info('laod_state() IOError ignored')
             #raise IOError
         except:
             log.exception('====')
@@ -487,7 +492,7 @@ if __name__ == '__main__':
 
     pprint(args)
     
-    args.filepath = 'dummy'
+    args.filepath = '0000.png'
     process(args)
     
     """
