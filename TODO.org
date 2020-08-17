@@ -2,3 +2,11 @@
 ** Just leave the single pages alone. 
 - need to add new tagging field
 - change process() to make use of the flag
+
+* remove all the extra features
+- like flipping, rotating 
+- they mostly confuse (even me at time)
+
+* Edit README
+** add instruction as to how to run the program
+** a minimal documentation
