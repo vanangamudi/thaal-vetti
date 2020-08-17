@@ -470,28 +470,33 @@ def process(args):
     right = right[:, xlim:]
     
     if args.debug:
-            imshow('left', left)
-            imshow('right', right)
-            cv2.waitKey(0)
+        imshow('left', left)
+        imshow('right', right)
+        cv2.waitKey(0)
             
 
-    cv2.imwrite(
-        '{}{}{}_0.png'.format(
+    output_path = '{}{}{}_0.png'.format(
             args.output_dir,
             os.path.sep,
-            os.path.splitext(args.filepath)[0],
-        ),
-        left)
-    
-    cv2.imwrite(
-        '{}{}{}_1.png'.format(
+            os.path.splitext(
+                os.path.basename(args.filepath)
+            )[0],
+        )
+    log.info('writing left side to {}'.format(output_path))
+
+    cv2.imwrite(output_path, left)
+
+    output_path = '{}{}{}_1.png'.format(
             args.output_dir,
             os.path.sep,
-            os.path.splitext(args.filepath)[0]
-        ),
-        right)
+            os.path.splitext(
+                os.path.basename(args.filepath)
+            )[0],
+        )
+    log.info('writing right side to {}'.format(output_path))
     
-           
+    cv2.imwrite(output_path, right)
+    
 import argparse
 if __name__ == '__main__':
 
@@ -536,6 +541,8 @@ if __name__ == '__main__':
     #process(args)
     
 
+    mkdir_if_exist_not(args.output_dir)    
+    
     errored_pages = []
     for filepath in sorted(glob('{}/*.png'.format(args.input_dir))):
         log.info('processing {}'.format(filepath))
