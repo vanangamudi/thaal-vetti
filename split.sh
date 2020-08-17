@@ -4,17 +4,67 @@ INPUT=$1
 INPUT_PAGES_DIR=${INPUT}_pages
 INPUT_SPLIT_PAGES_DIR=${INPUT}_split_pages
 
-mkdir $INPUT_PAGES_DIR $INPUT_SPLIT_PAGES_DIR
+mkdir -p $INPUT_PAGES_DIR $INPUT_SPLIT_PAGES_DIR
 
 echo "chunking pdf file into pages"
-convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.jpg
+# remove PNG24: and add necessary info into problems and fixes file
+convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.png
+
+RET=$?
+if test $RET -ne 0
+then
+    echo "ERROR:${RET} chunking failed!!!"
+
+    mkdir -p errored
+
+    rm -rd errored/$INPUT_PAGES_DIR
+    mv $INPUT_PAGES_DIR errored
+
+    exit -1
+fi
 
 # per page processing, in this case just copying the pages
 echo "doing the thing"
-cp $INPUT_PAGES_DIR/* $INPUT_SPLIT_PAGES_DIR
+#cp $INPUT_PAGES_DIR/* $INPUT_SPLIT_PAGES_DIR
+python3 split.py -i $INPUT_PAGES_DIR -o $INPUT_SPLIT_PAGES_DIR
+
+RET=$?
+if test $RET -ne 0
+then
+    echo "ERROR:${RET} spliting failed!!!"
+
+    mkdir -p errored
+
+    rm -rd errored/$INPUT_PAGES_DIR
+    mv $INPUT_PAGES_DIR  errored
+    
+    rm -rd errored/$INPUT_SPLIT_PAGES_DIR
+    mv $INPUT_SPLIT_PAGES_DIR errored
+    
+    exit -1
+fi
 
 echo "merging the pages into pdf"
 convert $INPUT_SPLIT_PAGES_DIR/*.jpg  ${INPUT}_split.pdf
+
+
+RET=$?
+if test $RET -ne 0
+then
+    echo "ERROR:${RET} spliting failed!!!"
+
+    mkdir -p errored
+
+    rm -rd errored/$INPUT_PAGES_DIR
+    mv $INPUT_PAGES_DIR  errored
+    
+    rm -rd errored/$INPUT_SPLIT_PAGES_DIR
+    mv $INPUT_SPLIT_PAGES_DIR errored
+    
+    exit -1
+fi
+
+
 
 rm -rf $INPUT_PAGES_DIR $INPUT_SPLIT_PAGES_DIR
 
