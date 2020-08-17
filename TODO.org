@@ -1,0 +1,4 @@
+* Add support to tag single pages
+** Just leave the single pages alone. 
+- need to add new tagging field
+- change process() to make use of the flag
