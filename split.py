@@ -380,13 +380,13 @@ def process(args):
     print(image.shape)
     
     h, w, n_channels = image.shape
-    x1, y1, x2, y2   = extend_line_to_boundary(image, line)
+    x1, y1, x2, y2   = extend_line_to_boundary3(image, line)
     #(x1, y1), (x2, y2)= line
 
     print([x1, y1], [x2, y2], h, w)
     
-    left_roi  = [[(0, 0), (0, h), (x1, y1), (x2, y2),]]
-    right_roi = [[(w, 0), (w, h), (x1, y1), (x2, y2),]]
+    left_roi  = [[(0, 0), (0, h), (x2, y2), (x1, y1),]]
+    right_roi = [[(w, 0), (w, h), (x2, y2), (x1, y1),]]
 
     print(left_roi)
     print(right_roi)
@@ -403,18 +403,18 @@ def process(args):
             cv2.polylines(masked_image, roi_corners, False, COLOR_LINE_SEGMENT, 5)
             
             #--- padding
-            ht, wd, cc = masked_image.shape
-            hh, ww, = h + 200, w + 200
+            # ht, wd, cc = masked_image.shape
+            # hh, ww, = h + 200, w + 200
             
-            xx = (ww - wd) // 2
-            yy = (hh - ht) // 2
+            # xx = (ww - wd) // 2
+            # yy = (hh - ht) // 2
             
-            temp = masked_image
-            masked_image = np.full( (hh,ww,cc),
-                                    (255, 255, 255, 255),
-                                    dtype=np.uint8)
+            # temp = masked_image
+            # masked_image = np.full( (hh,ww,cc),
+            #                         (255, 255, 255, 255),
+            #                         dtype=np.uint8)
             
-            masked_image[yy:yy+ht, xx:xx+wd] = temp
+            # masked_image[yy:yy+ht, xx:xx+wd] = temp
             #---
         
             put_text(masked_image,
@@ -438,9 +438,15 @@ def process(args):
     left  = mask(left_roi)
     right = mask(right_roi)
 
+    xlim = max(x1, x2)
+    left = left[:, :xlim]
+
+    xlim = min(x1, x2)
+    right = right[:, xlim:]
+    
     if args.very_verbose:
-            imshow('temp 3', left)
-            imshow('temp 4', right)
+            imshow('left', left)
+            imshow('right', right)
                             
     cv2.waitKey(0)
            
