@@ -4,7 +4,7 @@ UI tool for splitting scanned two page pdf
 ** Usage
 The tool consists for two scripts for now. `vetti.sh` and `vetti.py`.
 
-`vetti.sh` is the main interface. 
+*** `vetti.sh` is the main interface. 
 
 #+BEGIN_SRC bash
 vetti.sh csm <path-to-pdf>
@@ -20,7 +20,7 @@ say the pdf filename is tamil.pdf,
 - merge - will collect all the images from tamil.pdf_split_pages/ directory and produce a pdf file
 
 
-*** Note
+**** Note
 - it is preferred that for every pdf you run this tool once and finish it off in single stroke
 - but they can be independently run, but note that merge task will delete all the files created by chunk and merge
 
@@ -28,3 +28,20 @@ For example, in case the pdf is already chunked into pages, you can just run,
 #+BEGIN_SRC 
 vetti.sh sm <path-to-pdf>
 #+END_SRC
+
+
+*** `vetti.py` is GUI tool
+`vetti.py` is the captures the core of this project. It is GUI tool based on opencv library. 
+
+It is lets you draw the line based on which the pdf-page will be sliced into two parts.
+
+| Key     | Function                              |
+|---------+---------------------------------------|
+| `SPACE` | save the state of the line            |
+| `q`     | quit                                  |
+| `Enter` | Finished tagging and slices the image |
+
+
+Use the `mouse` to draw the line. Click and drag until you're satisfied. 
+
+Once you're fine with the line, press `Enter` to slice this page and start tagging the next page
