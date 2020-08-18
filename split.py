@@ -154,7 +154,7 @@ class Vetti:
 
         self.args = args
         self.name = name
-        self.filepath = '{}/{}.vetti'.format(self.args.output_dir, self.name)
+        self.filepath = 'vetti/{}/{}.vetti'.format(self.args.output_dir, self.name)
         
         self.img = img
         self.source = self.img.copy()
@@ -179,7 +179,7 @@ class Vetti:
         self.load_state()
 
     def save_state(self):
-        mkdir_if_exist_not('{}'.format(self.args.output_dir))
+        mkdir_if_exist_not('vetti/{}'.format(self.args.output_dir))
         log.info('saving data to {}'.format(self.filepath))
         with open(self.filepath, 'w') as f:
             f.write(
