@@ -1,2 +1,30 @@
-# thaal-vetti
+* thaal-vetti
 UI tool for splitting scanned two page pdf 
+
+** Usage
+The tool consists for two scripts for now. `vetti.sh` and `vetti.py`.
+
+`vetti.sh` is the main interface. 
+
+#+BEGIN_SRC bash
+vetti.sh csm <path-to-pdf>
+#+END_SRC
+
+where, csm - chunk, split, merge
+
+say the pdf filename is tamil.pdf,
+
+- chunk - splits the pdf into images (one per page) and places it under the tamil.pdf_pages/ directory
+- split - take images from tamil.pdf_pages and shows you a GUI for drawing a line,
+ where to slice the image and place them under tamil.pdf_split_pages/ directory
+- merge - will collect all the images from tamil.pdf_split_pages/ directory and produce a pdf file
+
+
+*** Note
+- it is preferred that for every pdf you run this tool once and finish it off in single stroke
+- but they can be independently run, but note that merge task will delete all the files created by chunk and merge
+
+For example, in case the pdf is already chunked into pages, you can just run,
+#+BEGIN_SRC 
+vetti.sh sm <path-to-pdf>
+#+END_SRC
