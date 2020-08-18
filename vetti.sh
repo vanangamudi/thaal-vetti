@@ -35,7 +35,7 @@ then
     # per page processing, in this case just copying the pages
     echo "doing the thing"
     #cp $INPUT_PAGES_DIR/* $INPUT_SPLIT_PAGES_DIR
-    python3 split.py -i $INPUT_PAGES_DIR -o $INPUT_SPLIT_PAGES_DIR
+    python3 vetti.py -i $INPUT_PAGES_DIR -o $INPUT_SPLIT_PAGES_DIR
     
     RET=$?
     if test $RET -ne 0

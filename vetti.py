@@ -291,6 +291,8 @@ class Vetti:
     def event_loop(self):
         print('image state == {} and args.force == {}'.format(self.finished, self.args.force))
 
+        retval = 'DONE'
+        
         if self.finished:
             print('already tagged image!!!')
         
@@ -324,7 +326,8 @@ class Vetti:
 
                 elif k == ord('q'):
                     log.debug('quit!')
-                    exit(0)
+                    retval = 'BREAK';
+                    break
 
                 elif k == ord(' '):
                     self.save_state()
@@ -341,7 +344,7 @@ class Vetti:
             self.save_state()
 
         cv2.destroyWindow(self.name)
-        return self.line
+        return retval, self.line
 
 def callback_show_point_func(img):
     def callback(event, x, y, flags, param):
@@ -366,113 +369,117 @@ def process(args):
                   image,
                   scale_factor=args.scale_factor)
     
-    line = vetti.event_loop()
+    retval, line = vetti.event_loop()
 
-    print(image.shape)
-    
-    h, w, n_channels = image.shape
-    x1, y1, x2, y2   = extend_line_to_boundary3(image, line)
-    #(x1, y1), (x2, y2)= line
+    if retval == 'DONE':
 
-    print([x1, y1], [x2, y2], h, w)
-    
-    left_roi  = [[(0, 0), (0, h), (x2, y2), (x1, y1),]]
-    right_roi = [[(w, 0), (w, h), (x2, y2), (x1, y1),]]
+        print(image.shape)
 
-    print(left_roi)
-    print(right_roi)
+        h, w, n_channels = image.shape
+        x1, y1, x2, y2   = extend_line_to_boundary3(image, line)
+        #(x1, y1), (x2, y2)= line
 
-    def mask(roi):
-        mask  = np.zeros(image.shape, dtype=np.uint8)
-        roi_corners = np.array(roi, dtype=np.int32)
-        ignore_mask_color = (255, ) * n_channels
-        
-        cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-        masked_image = cv2.bitwise_and(image, mask)
-        #np.copyto(masked_image, image, mask)
-        #masked_image += image * (mask > 0)
-        
-        masked_image += 255 * np.ones(image.shape, dtype=np.uint8) * (mask == 0)
-        
-        log.debug('mask shape: {}'.format(pformat(mask.shape)))
-        
+        print([x1, y1], [x2, y2], h, w)
+
+        left_roi  = [[(0, 0), (0, h), (x2, y2), (x1, y1),]]
+        right_roi = [[(w, 0), (w, h), (x2, y2), (x1, y1),]]
+
+        print(left_roi)
+        print(right_roi)
+
+        def mask(roi):
+            mask  = np.zeros(image.shape, dtype=np.uint8)
+            roi_corners = np.array(roi, dtype=np.int32)
+            ignore_mask_color = (255, ) * n_channels
+
+            cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+            masked_image = cv2.bitwise_and(image, mask)
+            #np.copyto(masked_image, image, mask)
+            #masked_image += image * (mask > 0)
+
+            masked_image += 255 * np.ones(image.shape, dtype=np.uint8) * (mask == 0)
+
+            log.debug('mask shape: {}'.format(pformat(mask.shape)))
+
+            if args.debug:
+                cv2.polylines(masked_image,
+                              roi_corners,
+                              False,
+                              COLOR_LINE_SEGMENT,
+                              5)
+
+                #--- padding
+                # ht, wd, cc = masked_image.shape
+                # hh, ww, = h + 200, w + 200
+
+                # xx = (ww - wd) // 2
+                # yy = (hh - ht) // 2
+
+                # temp = masked_image
+                # masked_image = np.full( (hh,ww,cc),
+                #                         (255, 255, 255, 255),
+                #                         dtype=np.uint8)
+
+                # masked_image[yy:yy+ht, xx:xx+wd] = temp
+                #---
+
+                put_text(masked_image,
+                         '1 ({}, {})'.format(*roi[0][0]),
+                         tuple(i + 100 for i in roi[0][0]))
+
+                put_text(masked_image,
+                         '2 ({}, {})'.format(*roi[0][1]),
+                         tuple(i + 100 for i in roi[0][1]))
+
+                put_text(masked_image,
+                         '3 ({}, {})'.format(*roi[0][2]),
+                         (w//2, 100))
+
+                put_text(masked_image,
+                         '4 ({}, {})'.format(*roi[0][3]),
+                         (w//2, h - 100 ))
+
+            return masked_image
+
+        left  = mask(left_roi)
+        right = mask(right_roi)
+
+        xlim = max(x1, x2)
+        left = left[:, :xlim]
+
+        xlim = min(x1, x2)
+        right = right[:, xlim:]
+
         if args.debug:
-            cv2.polylines(masked_image,
-                          roi_corners,
-                          False,
-                          COLOR_LINE_SEGMENT,
-                          5)
-            
-            #--- padding
-            # ht, wd, cc = masked_image.shape
-            # hh, ww, = h + 200, w + 200
-            
-            # xx = (ww - wd) // 2
-            # yy = (hh - ht) // 2
-            
-            # temp = masked_image
-            # masked_image = np.full( (hh,ww,cc),
-            #                         (255, 255, 255, 255),
-            #                         dtype=np.uint8)
-            
-            # masked_image[yy:yy+ht, xx:xx+wd] = temp
-            #---
+            imshow('left', left)
+            imshow('right', right)
+            cv2.waitKey(0)
+
+
+        output_path = '{}{}{}_0.png'.format(
+                args.output_dir,
+                os.path.sep,
+                os.path.splitext(
+                    os.path.basename(args.filepath)
+                )[0],
+            )
+        log.info('writing left side to {}'.format(output_path))
+
+        cv2.imwrite(output_path, left)
+
+        output_path = '{}{}{}_1.png'.format(
+                args.output_dir,
+                os.path.sep,
+                os.path.splitext(
+                    os.path.basename(args.filepath)
+                )[0],
+            )
+        log.info('writing right side to {}'.format(output_path))
+
+        cv2.imwrite(output_path, right)
         
-            put_text(masked_image,
-                     '1 ({}, {})'.format(*roi[0][0]),
-                     tuple(i + 100 for i in roi[0][0]))
-            
-            put_text(masked_image,
-                     '2 ({}, {})'.format(*roi[0][1]),
-                     tuple(i + 100 for i in roi[0][1]))
-            
-            put_text(masked_image,
-                     '3 ({}, {})'.format(*roi[0][2]),
-                     (w//2, 100))
-            
-            put_text(masked_image,
-                     '4 ({}, {})'.format(*roi[0][3]),
-                     (w//2, h - 100 ))
-        
-        return masked_image
+    return retval
 
-    left  = mask(left_roi)
-    right = mask(right_roi)
-    
-    xlim = max(x1, x2)
-    left = left[:, :xlim]
-    
-    xlim = min(x1, x2)
-    right = right[:, xlim:]
-    
-    if args.debug:
-        imshow('left', left)
-        imshow('right', right)
-        cv2.waitKey(0)
-            
-
-    output_path = '{}{}{}_0.png'.format(
-            args.output_dir,
-            os.path.sep,
-            os.path.splitext(
-                os.path.basename(args.filepath)
-            )[0],
-        )
-    log.info('writing left side to {}'.format(output_path))
-
-    cv2.imwrite(output_path, left)
-
-    output_path = '{}{}{}_1.png'.format(
-            args.output_dir,
-            os.path.sep,
-            os.path.splitext(
-                os.path.basename(args.filepath)
-            )[0],
-        )
-    log.info('writing right side to {}'.format(output_path))
-    
-    cv2.imwrite(output_path, right)
-    
 import argparse
 if __name__ == '__main__':
 
@@ -524,7 +531,9 @@ if __name__ == '__main__':
         log.info('processing {}'.format(filepath))
         try:
             args.filepath = filepath
-            process(args)
+            retval = process(args)
+            if retval == 'BREAK':
+                break
         except:
             log.exception(args.filepath)
             errored_pages.append(args.filepath)
