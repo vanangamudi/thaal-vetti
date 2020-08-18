@@ -13,8 +13,8 @@ import copy
 import pdb
     
 import logging
-FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
-logging.basicConfig(format=FORMAT_STRING)
+
+logging.basicConfig()
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
@@ -546,7 +546,12 @@ if __name__ == '__main__':
     
     #args.filepath = 'data/0000.png'
     #process(args)
-    
+
+    if args.debug:
+        FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
+        logging.basicConfig(format=FORMAT_STRING)
+        log = logging.getLogger(__name__)
+        log.setLevel(logging.DEBUG)
 
     mkdir_if_exist_not(args.output_dir)    
     
