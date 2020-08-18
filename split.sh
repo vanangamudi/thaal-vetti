@@ -11,7 +11,8 @@ if [[ $COMMAND == *"c"* ]]
 then
     echo "chunking pdf file into pages"
     # remove PNG24: and add necessary info into problems and fixes file
-    convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.png
+    # convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.png
+    gs  -dBATCH -dNOPAUSE -dSAFER -sDEVICE=png16m  -dJPEGQ=95 -r300x300 -sOutputFile=$INPUT_PAGES_DIR/%04d.png  $INPUT
     
     RET=$?
     if test $RET -ne 0
@@ -78,11 +79,13 @@ then
 	exit -1
     fi
 
+    
+    rm -rf $INPUT_PAGES_DIR $INPUT_SPLIT_PAGES_DIR
+
+
 fi
 
 
-
-rm -rf $INPUT_PAGES_DIR $INPUT_SPLIT_PAGES_DIR
 
 
 ########
