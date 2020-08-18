@@ -40,6 +40,7 @@ It is lets you draw the line based on which the pdf-page will be sliced into two
 | `Space` | save the state of the line            |
 | `q`     | quit                                  |
 | `Enter` | Finished tagging and slices the image |
+| `s`     | Keep the image as it is               |
 
 
 Use the `mouse` to draw the line. Click and drag until you're satisfied. 

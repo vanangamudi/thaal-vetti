@@ -332,6 +332,11 @@ class Vetti:
                     retval = 'BREAK';
                     break
 
+                elif k == ord('s'):
+                    log.debug('single page doc')
+                    retval = 'DONOTHING';
+                    break
+
                 elif k == ord(' '):
                     self.save_state()
 
@@ -480,6 +485,18 @@ def process(args):
         log.info('writing right side to {}'.format(output_path))
 
         cv2.imwrite(output_path, right)
+        
+    if retval == 'DONOTHING':
+        output_path = '{}{}{}_0.png'.format(
+                args.output_dir,
+                os.path.sep,
+                os.path.splitext(
+                    os.path.basename(args.filepath)
+                )[0],
+            )
+        log.info('writing iamge side to {}'.format(output_path))
+
+        cv2.imwrite(output_path, image)
         
     return retval
 

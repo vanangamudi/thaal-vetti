@@ -86,16 +86,3 @@ then
 fi
 
 
-
-
-########
-# If you get the following error
-#
-# convert-im6.q16: attempt to perform an operation not allowed by the security policy `PDF' @ error/constitute.c/IsCoderAuthorized/408.
-#
-# paste this in imagemagick config
-#
-# >>   <policy domain="coder" rights="read | write" pattern="PDF" />
-# in policymap section, i.e just before </policymap> in '/etc/ImageMagick-7/policy.xml'
-#
-#    reference: https://stackoverflow.com/questions/52998331/imagemagick-security-policy-pdf-blocking-conversion
