@@ -64,12 +64,15 @@ def slope(x1, y1,  x2, y2):
 def intercept(x1, y1, x2, y2):
     m = slope(x1, y1, x2, y2)
     #y = mx + b
-    assert int(y1 - m * x1) == int(y2 - m * x2), \
-        '{} =/= {} are you sure, this equation is correct?'.format(
-            int(y1 - m * x1),
-            int(y2 - m * x2))
-    
-    return (y1 - m * x1)
+    if m != 'NA':
+        assert int(y1 - m * x1) == int(y2 - m * x2), \
+            '{} =/= {} are you sure, this equation is correct?'.format(
+                int(y1 - m * x1),
+                int(y2 - m * x2))
+        
+        return (y1 - m * x1)
+    else:
+        return y1
 
 def extend_line_to_boundary(img, line):
     (x1, y1), (x2, y2) = line
