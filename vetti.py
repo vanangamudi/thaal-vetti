@@ -326,18 +326,19 @@ class Vetti:
                 self.imshow(self.name, self.img)
 
                 k = cv2.waitKey(100) & 0xFF
+
                 if k == 27:
                     log.debug('setting state to grab')
                     if self.line_backup != None:
                         self.line = self.line_backup
 
                 elif k == ord('q'):
-                    log.debug('quit!')
+                    log.info('quit!')
                     retval = 'BREAK';
                     break
 
                 elif k == ord('s'):
-                    log.debug('single page doc')
+                    log.info('single page doc')
                     retval = 'DONOTHING';
                     break
 
@@ -348,7 +349,22 @@ class Vetti:
                     log.info('setting image status to be finished')
                     self.finished = True
                     self.save_state()
+                    
+                elif k == 83:
+                    log.debug('moving right by 1')
+                    self.line[0][0] += 1
+                    self.line[1][0] += 1
+                    
+                    self.draw()
+                    
+                elif k == 81:
+                    log.debug('moving left by 1')
+                    self.line[0][0] -= 1
+                    self.line[1][0] -= 1
 
+                    self.draw()
+                
+                    
                 elif k == 13:
                     self.save_state()
                     break
@@ -391,13 +407,13 @@ def process(args):
         x1, y1, x2, y2   = extend_line_to_boundary3(image, line)
         #(x1, y1), (x2, y2)= line
 
-        print([x1, y1], [x2, y2], h, w)
+        log.debug('(x1, y1) (x2, y2), h, w: {}'.format(pformat([x1, y1], [x2, y2], h, w)))
 
         left_roi  = [[(0, 0), (0, h), (x2, y2), (x1, y1),]]
         right_roi = [[(w, 0), (w, h), (x2, y2), (x1, y1),]]
 
-        print(left_roi)
-        print(right_roi)
+        log.debug('left roi: '.format(pformat(left_roi)))
+        log.debug('right roi: '.format(pformat(right_roi)))
 
         def mask(roi):
             mask  = np.zeros(image.shape, dtype=np.uint8)
