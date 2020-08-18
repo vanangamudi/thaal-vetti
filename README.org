@@ -45,4 +45,7 @@ It is lets you draw the line based on which the pdf-page will be sliced into two
 
 Use the `mouse` to draw the line. Click and drag until you're satisfied. 
 
-Once you're fine with the line, press `Enter` to slice this page and start tagging the next page
+Once you're fine with the line, press `Enter` to slice this page and start tagging the next page.
+
+**** Note
+Just in case the current page is single page, press `s` key. This will keep the page intact
