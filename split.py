@@ -326,30 +326,6 @@ class Vetti:
                     log.debug('quit!')
                     exit(0)
 
-                elif k == ord('R'):
-                    log.debug('rotate image {} degree'.format(self.rotation))
-                    self.source = rotate(self.source, self.unit_rotation)
-                    self.rotation += self.unit_rotation
-                    self.draw()
-
-                elif k == ord('r'):
-                    log.debug('rotate image {} degree'.format(-self.rotation))
-                    self.source = rotate(self.source, -self.unit_rotation)
-                    self.rotation -= self.unit_rotation
-                    self.draw()
-
-                elif k == ord('c'):
-                    log.debug('clear rotation')
-                    self.source = self.source_backup.copy()
-                    self.rotation = 0
-                    self.draw()                
-
-                elif k == ord('f'):
-                    log.debug('rotate image {} degree'.format(-180))
-                    self.source = rotate(self.source, -180)
-                    self.rotation -= 180
-                    self.draw()
-
                 elif k == ord(' '):
                     self.save_state()
 
