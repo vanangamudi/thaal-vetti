@@ -25,7 +25,7 @@ say the pdf filename is tamil.pdf,
 - but they can be independently run, but note that merge task will delete all the files created by chunk and merge
 
 For example, in case the pdf is already chunked into pages, you can just run,
-#+BEGIN_SRC 
+#+BEGIN_SRC bash 
 vetti.sh sm <path-to-pdf>
 #+END_SRC
 
@@ -37,7 +37,7 @@ It is lets you draw the line based on which the pdf-page will be sliced into two
 
 | Key     | Function                              |
 |---------+---------------------------------------|
-| `SPACE` | save the state of the line            |
+| `Space` | save the state of the line            |
 | `q`     | quit                                  |
 | `Enter` | Finished tagging and slices the image |
 
