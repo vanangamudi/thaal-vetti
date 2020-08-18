@@ -121,8 +121,11 @@ def extend_line_to_boundary3(img, line):
 
     py, qy = 0, h
 
-    px = (0 - b) / m
-    qx = (h - b) / m
+    if m != 'NA':
+        px = (0 - b) / m
+        qx = (h - b) / m
+    else:
+        px = qx = w//2
 
     px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
     log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
@@ -174,7 +177,8 @@ class Vetti:
 
         self.rotation = 0
 
-        self.line = [(100, 100), (1500, 2000)]
+        h, w, *_ = self.img.shape
+        self.line = [(w//2, 0), (w//2, h)]
 
         self.first_point = None
         self.first_point_set = False
