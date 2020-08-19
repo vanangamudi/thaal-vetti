@@ -13,6 +13,7 @@ import copy
 import pdb
     
 import logging
+FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
@@ -178,12 +179,16 @@ class Vetti:
         self.rotation = 0
 
         h, w, *_ = self.img.shape
-        self.line = [(w//2, 0), (w//2, h)]
+        self.line = [[w//2, 0], [w//2, h]]
+        log.debug('default-line: {}'.format(pformat(self.line)))
 
         self.first_point = None
         self.first_point_set = False
 
-        self.load_state()
+        if args.clear:
+            self.save_state()
+        else:
+            self.load_state()
 
     def save_state(self):
         mkdir_if_exist_not('vetti/{}'.format(self.args.output_dir))
@@ -407,7 +412,9 @@ def process(args):
         x1, y1, x2, y2   = extend_line_to_boundary3(image, line)
         #(x1, y1), (x2, y2)= line
 
-        log.debug('(x1, y1) (x2, y2), h, w: {}'.format(pformat([x1, y1], [x2, y2], h, w)))
+        log.debug('(x1, y1) (x2, y2), h, w: {}'.format(
+            pformat( [[x1, y1], [x2, y2], h, w] )
+        ))
 
         left_roi  = [[(0, 0), (0, h), (x2, y2), (x1, y1),]]
         right_roi = [[(w, 0), (w, h), (x2, y2), (x1, y1),]]
@@ -536,8 +543,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--display-resolution',
                         help='display resolution of input image',
-                        action='store', default=0.3, dest='scale_factor')
+                        action='store', default=0.3,
+                        dest='scale_factor', type=float)
 
+    parser.add_argument('-C','--clear',
+                        help='start tagging fresh',
+                        action='store_true', default=False, dest='clear')
     
     parser.add_argument('-D', '--debug',
                         help='shows all the pieces of the characters',
@@ -564,7 +575,10 @@ if __name__ == '__main__':
     #process(args)
 
     if args.debug:
-        FORMAT_STRING = "%(levelname)-8s:%(name)-8s.%(funcName)-8s>> %(message)s"
+        args.verbose = True
+        
+    if args.verbose:
+
         logging.basicConfig(format=FORMAT_STRING)
         log = logging.getLogger(__name__)
         log.setLevel(logging.DEBUG)
