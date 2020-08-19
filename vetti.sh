@@ -4,7 +4,7 @@ PAGE_RESOLUTION=150
 
 # vetti.py scale factor, if the window appears too big decrease this number
 DISPLAY_RESOLUTION=0.5
-DEBUG='-D' # for debugging make it '--debug'
+DEBUG='' # for debugging make it '--debug'
 CLEAR='' # for clearing old state make it '--clear',
            #if you change display resolution set this to '--clear'
 
