@@ -40,8 +40,8 @@ def imshow(name, img, resize_factor = 0.4):
                                 fx=resize_factor,
                                 fy=resize_factor))
     
-    cv2.moveWindow(name, 100, 100)
-
+    #cv2.moveWindow(name, 100, 100)
+    
     return ret
     
 def put_text(img, text, position):
