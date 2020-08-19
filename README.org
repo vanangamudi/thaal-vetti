@@ -29,6 +29,35 @@ For example, in case the pdf is already chunked into pages, you can just run,
 vetti.sh sm <path-to-pdf>
 #+END_SRC
 
+*** Configuration/Tweaking
+Configuration variables are now defined at the top of the script.
+
+For example
+#+BEGIN_SRC  bash
+
+#### configs
+# Chunking config
+PAGE_RESOLUTION=150
+
+# vetti.py config
+DISPLAY_RESOLUTION=0.5
+DEBUG='-D' 
+CLEAR='--clear'
+           
+#+END_SRC
+
+**** Chunking 
+| Variable        | Function                                                 |
+|-----------------+----------------------------------------------------------|
+| PAGE_RESOLUTION | Change the output resolution of pdf images from chunking |
+|                 |                                                          |
+
+**** Vetti.py
+| Variable           | Function                                                               |
+|--------------------+------------------------------------------------------------------------|
+| DISPLAY_RESOLUTION | Change the size of the GUI window                                      |
+| DEBUG              | debug flag, show more windows that necessary but helpful for debugging |
+| CLEAR              | Erases the exisitng `.vetti` file                                      |
 
 *** `vetti.py` is GUI tool
 `vetti.py` is the captures the core of this project. It is GUI tool based on opencv library. 
@@ -49,3 +78,8 @@ Once you're fine with the line, press `Enter` to slice this page and start taggi
 
 **** Note
 Just in case the current page is single page, press `s` key. This will keep the page intact
+
+**** Note
+Since scale factor is also saved as part of the state, if you want to start afresh, pass --clear or -C switch to the `vetti.py`. This will delete old state and save the current state to `.vetti` file
+
+Clear(--clear/-C) is different from Force(--force/-F) as in --force switch merely show you exisitng line so that you can edit --clear switch erases whole state and start a fresh.
