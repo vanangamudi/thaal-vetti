@@ -125,7 +125,7 @@ def extend_line_to_boundary3(img, line):
         px = (0 - b) / m
         qx = (h - b) / m
     else:
-        px = qx = w//2
+        px = qx = x1
 
     px, py, qx, qy = [ int(i) for i in [px, py, qx, qy] ]
     log.debug('px, py, qx, qy: {}, {}, {}, {}'.format(px, py, qx, qy))
