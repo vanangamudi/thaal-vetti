@@ -1,3 +1,6 @@
+* Address the memory consumtion
+** figure out where is the memory is leaked? 
+- probably from too many copies of buffers
 * DONE Add support to tag single pages
 ** Just leave the single pages alone. 
 - need to add new tagging field
