@@ -558,9 +558,9 @@ if __name__ == '__main__':
                         help='start tagging even if finished set to true',
                         action='store_true', default=False, dest='force')
 
-    parser.add_argument('-i','--input-dir',
+    parser.add_argument('-i','--input',
                         help='path to the image file',
-                        default='pages', dest='input_dir')
+                        default='pages', dest='filepath')
 
     parser.add_argument('-o','--output-dir',
                         help='path to the image file',
@@ -586,17 +586,7 @@ if __name__ == '__main__':
     mkdir_if_exist_not(args.output_dir)    
     
     errored_pages = []
-    for filepath in sorted(glob('{}/*.png'.format(args.input_dir))):
-        log.info('processing {}'.format(filepath))
-        try:
-            args.filepath = filepath
-            retval = process(args)
-            if retval == 'BREAK':
-                break
-        except:
-            log.exception(args.filepath)
-            errored_pages.append(args.filepath)
-            
-        cv2.destroyAllWindows()
+    retval = process(args)
+    cv2.destroyAllWindows()
         
 

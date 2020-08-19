@@ -56,28 +56,32 @@ then
     echo "doing the thing"
     mkdir -p  $INPUT_SPLIT_PAGES_DIR
     #cp $INPUT_PAGES_DIR/* $INPUT_SPLIT_PAGES_DIR
-    python3 vetti.py \
-	    --display-resolution $DISPLAY_RESOLUTION \
-	    $DEBUG \
-	    $CLEAR \
-	    -i $INPUT_PAGES_DIR \
-	    -o $INPUT_SPLIT_PAGES_DIR
-    
-    RET=$?
-    if test $RET -ne 0
-    then
-	echo "ERROR:${RET} spliting failed!!!"
+    for filename in $INPUT_PAGES_DIR/*.png;
+    do
+	python3 vetti.py \
+		--display-resolution $DISPLAY_RESOLUTION \
+		$DEBUG \
+		$CLEAR \
+		-i $filename \
+		-o $INPUT_SPLIT_PAGES_DIR
+
 	
-	mkdir -p errored
+	RET=$?
+	if test $RET -ne 0
+	then
+	    echo "ERROR:${RET} spliting failed!!!"
+	    
+	    mkdir -p errored
+	    
+	    rm -rd errored/$INPUT_PAGES_DIR
+	    mv $INPUT_PAGES_DIR  errored
+	    
+	    rm -rd errored/$INPUT_SPLIT_PAGES_DIR
+	    mv $INPUT_SPLIT_PAGES_DIR errored
 	
-	rm -rd errored/$INPUT_PAGES_DIR
-	mv $INPUT_PAGES_DIR  errored
-	
-	rm -rd errored/$INPUT_SPLIT_PAGES_DIR
-	mv $INPUT_SPLIT_PAGES_DIR errored
-	
-	exit -1
-    fi
+	    exit -1
+	fi
+    done
     
 fi
 
