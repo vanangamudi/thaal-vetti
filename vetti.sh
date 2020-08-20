@@ -25,13 +25,15 @@ then
     echo "chunking pdf file into pages"
     # remove PNG24: and add necessary info into problems and fixes file
     # convert -set colorspace RGB -density 300 $INPUT PNG24:$INPUT_PAGES_DIR/%04d.png
+    npages=$(pdfinfo $INPUT | grep Pages: | cut -d ':' -f 2 | xargs)
+    
     gs  -dBATCH \
 	-dNOPAUSE \
 	-dSAFER \
 	-sDEVICE=png16m  \
 	-dJPEGQ=95 \
 	-r${PAGE_RESOLUTION}x${PAGE_RESOLUTION} \
-	-sOutputFile=$INPUT_PAGES_DIR/%04d.png \
+	-sOutputFile=$INPUT_PAGES_DIR/%04d_$npages.png \
 	$INPUT
     
     RET=$?
