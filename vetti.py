@@ -21,6 +21,9 @@ log.setLevel(logging.INFO)
 
 from pprint import pprint, pformat
 
+SLOPE_INFO_POSITION  = ( 10, 50)
+POINTS_INFO_POSITION = (200, 50)
+
 COLOR_LINE         = (212, 188,   0)
 COLOR_LINE_SEGMENT = (000,  44, 221)
 COLOR_CIRCLE       = (34,   87, 255)
@@ -52,7 +55,7 @@ def put_text(img, text, position):
                 cv2.FONT_HERSHEY_SIMPLEX,  
                 1,
                 COLOR_LINE,
-                2,
+                3,
                 cv2.LINE_AA)
         
 def slope(x1, y1,  x2, y2):
@@ -258,8 +261,10 @@ class Vetti:
                  LINE_SEGMENT_THICKNESS)
 
         put_text(self.img,
-                 '({})'.format(slope(x1, y1, x2, y2)),
-                 (100, 100))        
+                 '({})'.format(
+                     str(slope(x1, y1, x2, y2))[:5]
+                 ),
+                 SLOPE_INFO_POSITION)        
         
     def draw(self):
         del self.img
@@ -290,7 +295,7 @@ class Vetti:
             put_text(self.img,
                      '({}, {}) - ({}, {})'.format(*self.line[0],
                                                   *temp),
-                     (100, 150))
+                     POINTS_INFO_POSITION)
         
         if event == cv2.EVENT_LBUTTONUP:
             log.info('3 temp: {}'.format(pformat(temp)))
