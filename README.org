@@ -1,6 +1,8 @@
 * thaal-vetti
 UI tool for splitting scanned two page pdf 
 
+
+
 ** Usage
 The tool consists for two scripts for now. `vetti.sh` and `vetti.py`.
 
@@ -83,3 +85,13 @@ Just in case the current page is single page, press `s` key. This will keep the 
 Since scale factor is also saved as part of the state, if you want to start afresh, pass --clear or -C switch to the `vetti.py`. This will delete old state and save the current state to `.vetti` file
 
 Clear(--clear/-C) is different from Force(--force/-F) as in --force switch merely show you exisitng line so that you can edit --clear switch erases whole state and start a fresh.
+
+** Requirements
+*** bash/shell
+- pdfinfo
+- convert (from imagemagick suite)
+- ghostscript
+
+*** python
+- opencv
+
