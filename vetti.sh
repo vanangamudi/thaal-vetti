@@ -1,4 +1,9 @@
 #### configs
+# general
+NUMBER_PATTERN='%04d'
+DELIMITER='____'
+
+export DELIMITER
 # Chunking config
 PAGE_RESOLUTION=150
 
@@ -33,7 +38,7 @@ then
 	-sDEVICE=png16m  \
 	-dJPEGQ=95 \
 	-r${PAGE_RESOLUTION}x${PAGE_RESOLUTION} \
-	-sOutputFile=$INPUT_PAGES_DIR/%04d_$npages.png \
+	-sOutputFile=${INPUT_PAGES_DIR}/${NUMBER_PATTERN}${DELIMITER}${npages}.png \
 	$INPUT
     
     RET=$?

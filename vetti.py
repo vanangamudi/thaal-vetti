@@ -225,7 +225,13 @@ class Vetti:
             #raise IOError
         except:
             log.exception('====')
-            
+
+    def title_message(self, name=None):
+        count, total = self.name.split(os.environ['DELIMITER'])
+        total = total.split('.')[0]
+        
+        return '{} / {}'.format(count, total)
+        
     def imshow(self, name, img):
         imshow(name, img, 1/self.scale_factor)
 
@@ -333,7 +339,7 @@ class Vetti:
                 """
                 
                 cv2.setMouseCallback(self.name, self.callback)
-                self.imshow(self.name, self.img)
+                self.imshow(self.title_message(), self.img)
 
                 k = cv2.waitKey(100) & 0xFF
 
@@ -381,7 +387,7 @@ class Vetti:
 
             self.save_state()
 
-        cv2.destroyWindow(self.name)
+        cv2.destroyWindow(self.title_message())
         return retval, self.line
 
 def callback_show_point_func(img):
