@@ -155,6 +155,15 @@ def rotate(image, angleInDegrees):
     return outImg
 
 
+
+def gamma_correct(image, gamma=1.0):
+    gamma_inv = 1.0 / gamma
+    table = np.array( 255 * [ (i / 255.0) ** gamma_inv  for i in np.arange(0, 256) ],
+                      dtype=np.uint8,
+    )
+
+    return cv2.LUT(image, table)
+
 class Vetti:
     STATE_LINE_DRAWING = -1
     
